@@ -1,0 +1,5 @@
+{
+  "error": "Unprocessable Entity",
+  "message": "checkout: The requested commit hash was not found within the repository. Perhaps you forgot to push. The original message was: Failed on ['git', 'checkout', '-q', '0573741167b6e72bcc723c25e51c231b45c1340ee'], retcode 1, out '', err \"error: pathspec '0573741167b6e72bcc723c25e51c231b45c1340ee' did not match any file(s) known to git.\\n\"",
+  "status": 422
+}

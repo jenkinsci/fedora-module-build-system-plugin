@@ -1,0 +1,5 @@
+{
+  "error": "Internal Server Error",
+  "message": "Failed on ['git', 'clone', '-q', 'git://pkgs.fedoraproject.org/modules/testmodul2.git', '/tmp/tmprA_rXL/testmodul2'], retcode 128, out '', err 'fatal: remote error: access denied or repository not exported: /modules/testmodul2.git\\n'",
+  "status": 500
+}

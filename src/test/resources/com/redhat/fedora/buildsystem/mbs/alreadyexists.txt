@@ -1,0 +1,5 @@
+{
+  "error": "Conflict",
+  "message": "Module (state=1) already exists. Only new build or resubmission of build in \"init\" or \"failed\" state is allowed.",
+  "status": 409
+}
