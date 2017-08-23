@@ -216,13 +216,12 @@ public class MBSTest {
     public void complete() throws Exception {
         stubFor(post(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
                 .willReturn(ok("submitted.txt")));
+        stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
+                .willReturn(ok("waiting.txt")));
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "complete");
         p.setDefinition(new CpsFlowDefinition(loadPipelineScript("complete.groovy"), false));
         WorkflowRun b = p.scheduleBuild2(0).waitForStart();
         assertNotNull(b);
-        Thread.sleep(2000);
-        stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
-                .willReturn(ok("waiting.txt")));
         Thread.sleep(10000);
         stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
                 .willReturn(ok("ready.txt")));
