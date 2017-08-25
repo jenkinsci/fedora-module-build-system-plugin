@@ -208,4 +208,20 @@ public class Item implements Serializable {
         this.additionalProperties.put(name, value);
     }
 
+    @Override
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", kojiTag='" + kojiTag + '\'' +
+                ", name='" + name + '\'' +
+                ", owner='" + owner + '\'' +
+                ", state=" + state +
+                ", stateName='" + stateName + '\'' +
+                ", stateReason=" + stateReason +
+                ", tasks=" + tasks +
+                ", timeCompleted='" + timeCompleted + '\'' +
+                ", timeModified='" + timeModified + '\'' +
+                ", timeSubmitted='" + timeSubmitted + '\'' +
+                '}';
+    }
 }

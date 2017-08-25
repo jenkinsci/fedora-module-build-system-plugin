@@ -116,4 +116,15 @@ public class Rpm implements Serializable {
     public String getName() {
         return this.name;
     }
+
+    @Override
+    public String toString() {
+        return "Rpm{" +
+                "nvr=" + nvr +
+                ", state=" + state +
+                ", stateReason=" + stateReason +
+                ", taskId=" + taskId +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

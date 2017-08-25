@@ -9,6 +9,8 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.redhat.fedora.buildsystem.mbs.model.QueryResult;
 import com.redhat.fedora.buildsystem.mbs.model.SubmittedRequest;
 import hudson.Util;
+import hudson.model.Result;
+import hudson.model.TaskListener;
 import hudson.util.Secret;
 import org.apache.commons.compress.utils.IOUtils;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
@@ -19,6 +21,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.JenkinsRuleNonLocalhost;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,13 +38,16 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MBSTest {
     private static final int HTTPOK = 200;
     private static final int SERVICE_PORT = 32000;
+    private static final int HTTPUNAUTHORIZED = 401;
 
     @Rule
-    public final JenkinsRule jenkins = new JenkinsRule();
+    public final JenkinsRuleNonLocalhost jenkins = new JenkinsRuleNonLocalhost();
     @Rule
     public final WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
 
@@ -78,6 +84,12 @@ public class MBSTest {
                 .withBody(body);
     }
 
+    private ResponseDefinitionBuilder notauthorized() {
+        return aResponse()
+                .withStatus(HTTPUNAUTHORIZED)
+                .withBody("Not Authorized");
+    }
+
     private ResponseDefinitionBuilder error(String path, int statusCode, String... args) {
         String body = String.format(readFile(path), args);
         return aResponse()
@@ -87,14 +99,14 @@ public class MBSTest {
     }
 
     private SubmittedRequest submitRequest() {
-        return MBSUtils.submitModuleRequest("http://localhost:" + SERVICE_PORT,
+        return MBSUtils.submitModuleRequest("http://localhost:" + SERVICE_PORT + MBSUtils.MBS_URLPREFIX,
                 "scott", "scott",
-                "mymodule", "myrev", "mybranch", null);
+                "mymodule", "myrev", "mybranch", getTaskListenerMock());
 
     }
 
     private QueryResult query() {
-        return MBSUtils.query("http://localhost:" + SERVICE_PORT,null);
+        return MBSUtils.query("http://localhost:" + SERVICE_PORT + MBSUtils.MBS_URLPREFIX, getTaskListenerMock());
     }
 
     @Test(expected = MBSException.class)
@@ -189,18 +201,11 @@ public class MBSTest {
         }
     }
 
-    @Test
-    public void simpleSubmit() throws Exception {
+    private WorkflowRun simpleSubmit(String passwordToOffer) throws Exception {
         String credId   = "bobs-password";
-        String username = "bob";
-        String password = "s3cr3t";
-
-        stubFor(post(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
-                //.withBasicAuth(username, password)
-                .willReturn(ok("submitted.txt")));
 
         StringCredentialsImpl c = new StringCredentialsImpl(CredentialsScope.GLOBAL,
-                credId, credId, Secret.fromString(password));
+                credId, credId, Secret.fromString(passwordToOffer));
         CredentialsProvider.lookupStores(jenkins).iterator().next().addCredentials(Domain.global(), c);
 
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "simpleSubmit");
@@ -212,8 +217,35 @@ public class MBSTest {
         for (String s: log) {
             System.out.println(s);
         }
+        return b;
+    }
+
+    @Test
+    public void simpleSubmit() throws Exception {
+        String username = "bob";
+        String password = "s3cr3t";
+
+        stubFor(post(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
+                .withBasicAuth(username, password)
+                .willReturn(ok("submitted.txt")));
+
+        WorkflowRun b = simpleSubmit(password);
         jenkins.assertBuildStatusSuccess(b);
         jenkins.assertLogContains("my submission id is: 1", b);
+    }
+
+    @Test
+    public void simpleSubmitBadPassword() throws Exception {
+        String username = "bob";
+        String password = "badpass";
+
+        stubFor(post(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
+                .withBasicAuth(username, password)
+                .willReturn(notauthorized()));
+
+        WorkflowRun b = simpleSubmit(password);
+        jenkins.assertBuildStatus(Result.FAILURE, b);
+        jenkins.assertLogContains("Call to http://localhost:32000/module-build-service/1/module-builds/?verbose=true returned 401 Response was: Not Authorized", b);
     }
 
     @Test
@@ -234,10 +266,21 @@ public class MBSTest {
 
     @Test
     public void complete() throws Exception {
+        String credId   = "bobs-password";
+        String username = "bob";
+        String password = "s3cr3t";
+
         stubFor(post(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
+                .withBasicAuth(username, password)
                 .willReturn(ok("submitted.txt")));
+
         stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
                 .willReturn(ok("waiting.txt")));
+
+        StringCredentialsImpl c = new StringCredentialsImpl(CredentialsScope.GLOBAL,
+                credId, credId, Secret.fromString(password));
+        CredentialsProvider.lookupStores(jenkins).iterator().next().addCredentials(Domain.global(), c);
+
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "complete");
         p.setDefinition(new CpsFlowDefinition(loadPipelineScript("complete.groovy"), false));
         WorkflowRun b = p.scheduleBuild2(0).waitForStart();
@@ -255,4 +298,9 @@ public class MBSTest {
         jenkins.assertLogContains("Module id: 1 is ready", b);
     }
 
+    public static TaskListener getTaskListenerMock() {
+        TaskListener mockTaskListener = mock(TaskListener.class);
+        when(mockTaskListener.getLogger()).thenReturn(System.out);
+        return mockTaskListener;
+    }
 }

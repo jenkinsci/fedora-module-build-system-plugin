@@ -52,4 +52,10 @@ public class Tasks implements Serializable {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "Tasks{" +
+                "rpms=" + rpms +
+                '}';
+    }
 }

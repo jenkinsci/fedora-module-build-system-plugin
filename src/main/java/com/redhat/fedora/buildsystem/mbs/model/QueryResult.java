@@ -74,6 +74,14 @@ public class QueryResult implements Serializable {
         this.additionalProperties.put(name, value);
     }
 
+    @Override
+    public String toString() {
+        return "QueryResult{" +
+                "items=" + items +
+                ", meta=" + meta +
+                '}';
+    }
+
     public boolean isModuleReady(long id) {
         if (items != null) {
             for (Item item: items) {

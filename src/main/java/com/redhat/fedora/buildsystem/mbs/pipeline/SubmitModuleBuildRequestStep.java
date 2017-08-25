@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.redhat.fedora.buildsystem.mbs.MBSException;
 import com.redhat.fedora.buildsystem.mbs.MBSUtils;
 import com.redhat.fedora.buildsystem.mbs.model.SubmittedRequest;
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.Run;
@@ -16,6 +17,7 @@ import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -80,6 +82,21 @@ public class SubmitModuleBuildRequestStep extends Step {
     }
 
     @DataBoundSetter
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+    }
+
+    @DataBoundSetter
+    public void setRevision(String revision) {
+        this.revision = revision;
+    }
+
+    @DataBoundSetter
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    @DataBoundSetter
     public void setMbsUrl(String mbsUrl) {
         this.mbsUrl = mbsUrl;
     }
@@ -89,7 +106,7 @@ public class SubmitModuleBuildRequestStep extends Step {
         return new SubmitModuleBuildRequestStep.Execution(this, context);
     }
 
-    public static final class Execution extends AbstractStepExecutionImpl {
+    public static final class Execution extends SynchronousNonBlockingStepExecution<SubmittedRequest> {
 
         Execution(SubmitModuleBuildRequestStep step, StepContext context) {
             super(context);
@@ -98,38 +115,21 @@ public class SubmitModuleBuildRequestStep extends Step {
 
         @Inject
         private transient SubmitModuleBuildRequestStep step;
-        private transient Future task;
 
         @Override
-        public boolean start() throws Exception {
-
-            task = Timer.get().submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        SubmittedRequest request = MBSUtils.submitModuleRequest(step.getMbsUrl(),
-                                step.getUser(),
-                                step.getPassword(),
-                                step.getModuleName(),
-                                step.getRevision(),
-                                step.getBranch(),
-                                getContext().get(TaskListener.class));
-                        getContext().onSuccess(request);
-                    } catch (MBSException mex) {
-                        getContext().onFailure(mex);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            return false;
-        }
-
-        @Override
-        public void stop(@Nonnull Throwable throwable) throws Exception {
-            task.cancel(true);
+        public SubmittedRequest run() throws Exception {
+            try {
+                SubmittedRequest request = MBSUtils.submitModuleRequest(step.getMbsUrl() + MBSUtils.MBS_URLPREFIX,
+                        step.getUser(),
+                        step.getPassword(),
+                        step.getModuleName(),
+                        step.getRevision(),
+                        step.getBranch(),
+                        getContext().get(TaskListener.class));
+                return request;
+            } catch (MBSException mex) {
+                throw new AbortException(mex.getMessage());
+            }
         }
 
         private static final long serialVersionUID = 1L;
@@ -138,7 +138,7 @@ public class SubmitModuleBuildRequestStep extends Step {
     /**
      * Adds the step as a workflow extension.
      */
-    @Extension(optional = true)
+    @Extension
     public static class DescriptorImpl extends StepDescriptor {
 
         @Override public Set<? extends Class<?>> getRequiredContext() {

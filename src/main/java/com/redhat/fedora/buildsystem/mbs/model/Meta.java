@@ -30,6 +30,19 @@ public class Meta implements Serializable {
     private Long page;
     @JsonProperty("pages")
     private Long pages;
+
+    @Override
+    public String toString() {
+        return "Meta{" +
+                "first='" + first + '\'' +
+                ", last='" + last + '\'' +
+                ", page=" + page +
+                ", pages=" + pages +
+                ", perPage=" + perPage +
+                ", total=" + total +
+                '}';
+    }
+
     @JsonProperty("per_page")
     private Long perPage;
     @JsonProperty("total")

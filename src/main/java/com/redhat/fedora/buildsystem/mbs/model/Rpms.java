@@ -34,4 +34,11 @@ public class Rpms implements Serializable {
     public Map<String, Rpm> getRpmList() {
         return this.additionalProperties;
     }
+
+    @Override
+    public String toString() {
+        return "Rpms{" +
+                "additionalProperties=" + additionalProperties +
+                '}';
+    }
 }

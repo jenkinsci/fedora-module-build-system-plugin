@@ -68,14 +68,17 @@ public class QueryModuleBuildRequestStep extends Step {
                 @Override
                 public void run() {
                     try {
-                        QueryResult result = MBSUtils.query(step.getMbsUrl(),
+                        QueryResult result = MBSUtils.query(step.getMbsUrl() + MBSUtils.MBS_URLPREFIX,
                                 getContext().get(TaskListener.class));
                         getContext().onSuccess(result);
                     } catch (MBSException mex) {
                         getContext().onFailure(mex);
+                        mex.printStackTrace();
                     } catch (InterruptedException e) {
+                        getContext().onFailure(e);
                         e.printStackTrace();
                     } catch (IOException e) {
+                        getContext().onFailure(e);
                         e.printStackTrace();
                     }
                 }

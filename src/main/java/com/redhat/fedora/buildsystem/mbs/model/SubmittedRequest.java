@@ -359,4 +359,27 @@ public class SubmittedRequest implements Serializable {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "SubmittedRequest{" +
+                "componentBuilds=" + componentBuilds +
+                ", id=" + id +
+                ", kojiTag=" + kojiTag +
+                ", modulemd='" + modulemd + '\'' +
+                ", name='" + name + '\'' +
+                ", owner='" + owner + '\'' +
+                ", scmurl='" + scmurl + '\'' +
+                ", state=" + state +
+                ", stateName='" + stateName + '\'' +
+                ", stateReason=" + stateReason +
+                ", stateTrace=" + stateTrace +
+                ", stateUrl='" + stateUrl + '\'' +
+                ", stream='" + stream + '\'' +
+                ", tasks=" + tasks +
+                ", timeCompleted=" + timeCompleted +
+                ", timeModified='" + timeModified + '\'' +
+                ", timeSubmitted='" + timeSubmitted + '\'' +
+                ", version='" + version + '\'' +
+                '}';
+    }
 }

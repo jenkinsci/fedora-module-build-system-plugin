@@ -1,5 +1,3 @@
-import hudson.util.Secret
-
 node() {
     waitUntil {
         query = queryModuleBuildRequest mbsUrl: "http://localhost:32000"

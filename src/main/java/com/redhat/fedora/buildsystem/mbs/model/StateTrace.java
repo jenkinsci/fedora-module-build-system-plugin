@@ -106,4 +106,13 @@ public class StateTrace implements Serializable {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "StateTrace{" +
+                "reason=" + reason +
+                ", state=" + state +
+                ", stateName='" + stateName + '\'' +
+                ", time='" + time + '\'' +
+                '}';
+    }
 }
