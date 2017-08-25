@@ -39,10 +39,10 @@ public class MBSUtils {
         return client;
     }
 
-    public static Client createClient(String user, Secret password) {
+    public static Client createClient(String user, String password) {
         ClientConfig clientConfig = new ClientConfig();
         HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(user,
-                Secret.toString(password));
+                password);
         clientConfig.register(feature);
         clientConfig.register(JacksonFeature.class);
         Client client = ClientBuilder.newClient(clientConfig);
@@ -66,7 +66,7 @@ public class MBSUtils {
         return response;
     }
 
-    public static SubmittedRequest submitModuleRequest(String url, String user, Secret password,
+    public static SubmittedRequest submitModuleRequest(String url, String user, String password,
                                                        String module,
                                                        String rev, String branch, TaskListener listener) throws MBSException {
         Client client = createClient(user, password);

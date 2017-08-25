@@ -5,7 +5,7 @@
  <parent>
   <groupId>org.jenkins-ci.plugins</groupId>
   <artifactId>plugin</artifactId>
-  <version>2.12</version>
+  <version>2.23</version>
   <relativePath />
  </parent>
 
@@ -60,24 +60,26 @@
  </pluginRepositories>
 
  <properties>
-  <jenkins.version>2.46.3</jenkins.version>
-  <java.level>7</java.level>
+  <jenkins.version>2.60.3</jenkins.version>
+  <java.level>8</java.level>
   <argLine />
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <surefire.useFile>false</surefire.useFile>
-  <jenkins-structs.version>1.6</jenkins-structs.version>
-  <jenkins-basic-steps.version>2.3</jenkins-basic-steps.version>
-  <jenkins-durable-task.version>1.13</jenkins-durable-task.version>
-  <jenkins-durable-task-step.version>2.11</jenkins-durable-task-step.version>
-  <jenkins-structs.version>1.6</jenkins-structs.version>
-  <jenkins-workflow-cps.version>2.29</jenkins-workflow-cps.version>
-  <jenkins-workflow-job.version>2.9</jenkins-workflow-job.version>
-  <jenkins-workflow-step-api.version>2.9</jenkins-workflow-step-api.version>
+  <jenkins-structs.version>1.10</jenkins-structs.version>
+  <jenkins-basic-steps.version>2.6</jenkins-basic-steps.version>
+  <jenkins-credentials.version>2.1.14</jenkins-credentials.version>
+  <jenkins-plaincredentials.version>1.4</jenkins-plaincredentials.version>
+  <jenkins-durable-task.version>1.14</jenkins-durable-task.version>
+  <jenkins-durable-task-step.version>2.14</jenkins-durable-task-step.version>
+  <jenkins-workflow-cps.version>2.39</jenkins-workflow-cps.version>
+  <jenkins-workflow-job.version>2.11.2</jenkins-workflow-job.version>
+  <jenkins-workflow-step-api.version>2.12</jenkins-workflow-step-api.version>
   <jenkins-workflow-support.version>2.14</jenkins-workflow-support.version>
-  <jenkins-workflow-api.version>2.11</jenkins-workflow-api.version>
-  <jenkins-workflow-scm-step.version>2.4</jenkins-workflow-scm-step.version>
-  <jenkins-scm-api.version>2.0.7</jenkins-scm-api.version>
-  <jenkins-script-security.version>1.26</jenkins-script-security.version>
+  <jenkins-workflow-api.version>2.20</jenkins-workflow-api.version>
+  <jenkins-workflow-scm-step.version>2.5</jenkins-workflow-scm-step.version>
+  <jenkins-scm-api.version>2.2.1</jenkins-scm-api.version>
+  <jenkins-script-security.version>1.33</jenkins-script-security.version>
+  <jenkins-credentials-binding.version>1.13</jenkins-credentials-binding.version>
  </properties>
 
  <dependencyManagement>
@@ -91,15 +93,23 @@
  </dependencyManagement>
 
  <dependencies>
+  <!--
   <dependency>
    <groupId>org.apache.commons</groupId>
    <artifactId>commons-lang3</artifactId>
    <version>3.4</version>
   </dependency>
+  -->
   <dependency>
    <groupId>org.glassfish.jersey.core</groupId>
    <artifactId>jersey-client</artifactId>
    <version>2.22.1</version>
+   <exclusions>
+    <exclusion>
+     <groupId>org.glassfish.hk2</groupId>
+     <artifactId>hk2-utils</artifactId>
+    </exclusion>
+   </exclusions>
   </dependency>
   <dependency>
    <groupId>org.glassfish.jersey.media</groupId>
@@ -154,6 +164,8 @@
    <artifactId>script-security</artifactId>
    <version>${jenkins-script-security.version}</version>
   </dependency>
+
+
   <dependency>
    <groupId>org.jenkins-ci.plugins.workflow</groupId>
    <artifactId>workflow-support</artifactId>
@@ -174,14 +186,14 @@
    <version>${jenkins-basic-steps.version}</version>
    <scope>test</scope>
   </dependency>
-  <dependency> <!-- StepConfigTester -->
+  <dependency>
    <groupId>org.jenkins-ci.plugins.workflow</groupId>
    <artifactId>workflow-step-api</artifactId>
    <version>${jenkins-workflow-step-api.version}</version>
    <classifier>tests</classifier>
    <scope>test</scope>
   </dependency>
-  <dependency> <!-- SemaphoreStep -->
+  <dependency>
    <groupId>org.jenkins-ci.plugins.workflow</groupId>
    <artifactId>workflow-support</artifactId>
    <version>${jenkins-workflow-support.version}</version>
@@ -206,11 +218,53 @@
    <version>${jenkins-workflow-api.version}</version>
    <scope>test</scope>
   </dependency>
+  <dependency>
+   <groupId>org.jenkins-ci.plugins</groupId>
+   <artifactId>credentials</artifactId>
+   <version>${jenkins-credentials.version}</version>
+   <scope>test</scope>
+  </dependency>
+  <dependency>
+   <groupId>org.jenkins-ci.plugins</groupId>
+   <artifactId>plain-credentials</artifactId>
+   <version>${jenkins-plaincredentials.version}</version>
+   <scope>test</scope>
+  </dependency>
+  <dependency>
+   <groupId>org.jenkins-ci.plugins</groupId>
+   <artifactId>credentials-binding</artifactId>
+   <version>${jenkins-credentials-binding.version}</version>
+   <scope>test</scope>
+  </dependency>
+   <dependency>
+   <groupId>org.jenkins-ci.plugins</groupId>
+   <artifactId>junit</artifactId>
+   <version>1.6</version>
+   <scope>test</scope>
+  </dependency>
+
 
  </dependencies>
 
  <build>
   <plugins>
+   <plugin>
+    <groupId>org.jenkins-ci.tools</groupId>
+    <artifactId>maven-hpi-plugin</artifactId>
+    <version>1.120</version>
+    <configuration>
+     <systemProperties>
+      <systemProperty>
+       <name>jenkins.install.runSetupWizard</name>
+       <value>false</value>
+      </systemProperty>
+      <systemProperty>
+       <name>hudson.model.ParametersAction.keepUndefinedParameters</name>
+       <value>true</value>
+      </systemProperty>
+     </systemProperties>
+    </configuration>
+   </plugin>
    <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-surefire-plugin</artifactId>

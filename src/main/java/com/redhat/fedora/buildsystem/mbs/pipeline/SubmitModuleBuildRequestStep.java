@@ -36,7 +36,7 @@ public class SubmitModuleBuildRequestStep extends Step {
     private String branch;
     private String mbsUrl;
     private String user;
-    private Secret password;
+    private String password;
 
     public String getModuleName() {
         return moduleName;
@@ -58,7 +58,7 @@ public class SubmitModuleBuildRequestStep extends Step {
         return user;
     }
 
-    public Secret getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -75,7 +75,7 @@ public class SubmitModuleBuildRequestStep extends Step {
     }
 
     @DataBoundSetter
-    public void setPassword(Secret password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 

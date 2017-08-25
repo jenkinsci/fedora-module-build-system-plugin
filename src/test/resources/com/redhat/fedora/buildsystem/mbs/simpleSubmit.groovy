@@ -1,12 +1,26 @@
-import hudson.util.Secret
-
 node() {
-    submission = submitModuleBuildRequest mbsUrl: "http://localhost:32000",
-            user: "scott",
-            password: Secret.fromString("scott"),
-            module: "mymodule",
-            rev: "myrev",
-            branch: "mybranch"
-    echo "my submission id is: " + submission.getId()
-    sleep 10
+
+    MBSURL   = "http://localhost:32000"
+    USERNAME = "bob"
+    CREDID   = "bobs-password"
+    MODULE   = "mymodule"
+    REV      = "myrev"
+    BRANCH   = "mybranch"
+
+    withCredentials([string(credentialsId: CREDID, variable: 'PASSWORD')]) {
+
+        // make call to MBS
+        submission = submitModuleBuildRequest \
+                mbsUrl: MBSURL,
+                user: USERNAME,
+                password: PASSWORD,
+                module: MODULE,
+                rev: REV,
+                branch: BRANCH
+
+        echo "my submission id is: " + submission.getId()
+
+        sleep 10
+    }
+
 }

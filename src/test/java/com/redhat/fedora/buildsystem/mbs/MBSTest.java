@@ -1,14 +1,17 @@
 package com.redhat.fedora.buildsystem.mbs;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.domains.Domain;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.redhat.fedora.buildsystem.mbs.model.QueryResult;
 import com.redhat.fedora.buildsystem.mbs.model.SubmittedRequest;
 import hudson.Util;
-import hudson.console.AnnotatedLargeText;
 import hudson.util.Secret;
 import org.apache.commons.compress.utils.IOUtils;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -23,13 +26,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Random;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -87,7 +88,7 @@ public class MBSTest {
 
     private SubmittedRequest submitRequest() {
         return MBSUtils.submitModuleRequest("http://localhost:" + SERVICE_PORT,
-                "scott", Secret.fromString("scott"),
+                "scott", "scott",
                 "mymodule", "myrev", "mybranch", null);
 
     }
@@ -190,13 +191,28 @@ public class MBSTest {
 
     @Test
     public void simpleSubmit() throws Exception {
+        String credId   = "bobs-password";
+        String username = "bob";
+        String password = "s3cr3t";
+
         stubFor(post(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
+                //.withBasicAuth(username, password)
                 .willReturn(ok("submitted.txt")));
+
+        StringCredentialsImpl c = new StringCredentialsImpl(CredentialsScope.GLOBAL,
+                credId, credId, Secret.fromString(password));
+        CredentialsProvider.lookupStores(jenkins).iterator().next().addCredentials(Domain.global(), c);
+
         WorkflowJob p = jenkins.createProject(WorkflowJob.class, "simpleSubmit");
         p.setDefinition(new CpsFlowDefinition(loadPipelineScript("simpleSubmit.groovy"), false));
         WorkflowRun b = p.scheduleBuild2(0).waitForStart();
         assertNotNull(b);
-        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(b));
+        jenkins.waitForCompletion(b);
+        List<String> log = b.getLog(1000);
+        for (String s: log) {
+            System.out.println(s);
+        }
+        jenkins.assertBuildStatusSuccess(b);
         jenkins.assertLogContains("my submission id is: 1", b);
     }
 
@@ -209,6 +225,10 @@ public class MBSTest {
         WorkflowRun b = p.scheduleBuild2(0).waitForStart();
         assertNotNull(b);
         jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(b));
+        List<String> log = b.getLog(1000);
+        for (String s: log) {
+            System.out.println(s);
+        }
         jenkins.assertLogContains("Module id: 1 is ready", b);
     }
 
@@ -225,13 +245,14 @@ public class MBSTest {
         Thread.sleep(10000);
         stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
                 .willReturn(ok("ready.txt")));
-        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(b));
-        jenkins.assertLogContains("my submission id is: 1", b);
-        jenkins.assertLogContains("Module id: 1 is ready", b);
+        jenkins.waitForCompletion(b);
         List<String> log = b.getLog(1000);
         for (String s: log) {
             System.out.println(s);
         }
+        jenkins.assertBuildStatusSuccess(b);
+        jenkins.assertLogContains("my submission id is: 1", b);
+        jenkins.assertLogContains("Module id: 1 is ready", b);
     }
 
 }
