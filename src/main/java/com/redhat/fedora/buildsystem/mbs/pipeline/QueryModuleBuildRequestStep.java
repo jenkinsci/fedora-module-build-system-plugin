@@ -32,14 +32,14 @@ import java.util.concurrent.Future;
 public class QueryModuleBuildRequestStep extends Step {
 
     private String mbsUrl;
-    private Integer moduleRequestId;
+    private String moduleRequestId;
 
     public String getModuleRequestId() {
-        return moduleRequestId.toString();
+        return moduleRequestId;
     }
 
     @DataBoundSetter
-    public void setModuleRequestId(Integer moduleRequestId) {
+    public void setModuleRequestId(String moduleRequestId) {
         this.moduleRequestId = moduleRequestId;
     }
 

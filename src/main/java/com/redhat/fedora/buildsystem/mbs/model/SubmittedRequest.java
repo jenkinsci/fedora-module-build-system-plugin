@@ -90,8 +90,8 @@ public class SubmittedRequest implements Serializable {
     }
 
     @JsonProperty("id")
-    public long getId() {
-        return id;
+    public String getId() {
+        return new Long(id).toString();
     }
 
     @JsonProperty("id")

@@ -291,7 +291,7 @@ public class MBSTest {
                 .willReturn(ok("submitted.txt")));
 
         stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
-                .willReturn(ok("waiting.txt")));
+                .willReturn(ok("module-waiting.txt")));
 
         StringCredentialsImpl c = new StringCredentialsImpl(CredentialsScope.GLOBAL,
                 credId, credId, Secret.fromString(password));
@@ -303,7 +303,7 @@ public class MBSTest {
         assertNotNull(b);
         Thread.sleep(10000);
         stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
-                .willReturn(ok("ready.txt")));
+                .willReturn(ok("module-ready.txt")));
         jenkins.waitForCompletion(b);
         List<String> log = b.getLog(1000);
         for (String s: log) {
