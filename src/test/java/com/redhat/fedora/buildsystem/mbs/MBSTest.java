@@ -265,6 +265,22 @@ public class MBSTest {
     }
 
     @Test
+    public void simpleModuleQuery() throws Exception {
+        stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
+                .willReturn(ok("module-ready.txt")));
+        WorkflowJob p = jenkins.createProject(WorkflowJob.class, "simpleModuleQuery");
+        p.setDefinition(new CpsFlowDefinition(loadPipelineScript("simpleModuleQuery.groovy"), false));
+        WorkflowRun b = p.scheduleBuild2(0).waitForStart();
+        assertNotNull(b);
+        jenkins.assertBuildStatusSuccess(jenkins.waitForCompletion(b));
+        List<String> log = b.getLog(1000);
+        for (String s: log) {
+            System.out.println(s);
+        }
+        jenkins.assertLogContains("Module id: 1 is ready", b);
+    }
+
+    @Test
     public void complete() throws Exception {
         String credId   = "bobs-password";
         String username = "bob";

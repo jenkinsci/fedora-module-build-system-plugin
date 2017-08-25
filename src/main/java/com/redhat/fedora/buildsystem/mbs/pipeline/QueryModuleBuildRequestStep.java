@@ -11,6 +11,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.Secret;
 import jenkins.util.Timer;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepExecutionImpl;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -31,6 +32,16 @@ import java.util.concurrent.Future;
 public class QueryModuleBuildRequestStep extends Step {
 
     private String mbsUrl;
+    private Integer moduleRequestId;
+
+    public String getModuleRequestId() {
+        return moduleRequestId.toString();
+    }
+
+    @DataBoundSetter
+    public void setModuleRequestId(Integer moduleRequestId) {
+        this.moduleRequestId = moduleRequestId;
+    }
 
     public String getMbsUrl() {
         return mbsUrl;
@@ -68,9 +79,16 @@ public class QueryModuleBuildRequestStep extends Step {
                 @Override
                 public void run() {
                     try {
-                        QueryResult result = MBSUtils.query(step.getMbsUrl() + MBSUtils.MBS_URLPREFIX,
-                                getContext().get(TaskListener.class));
-                        getContext().onSuccess(result);
+                        if (StringUtils.isEmpty(step.getModuleRequestId())) {
+                            QueryResult result = MBSUtils.query(step.getMbsUrl() + MBSUtils.MBS_URLPREFIX,
+                                    getContext().get(TaskListener.class));
+                            getContext().onSuccess(result);
+                        } else {
+                            SubmittedRequest result = MBSUtils.queryModule(step.getMbsUrl() + MBSUtils.MBS_URLPREFIX,
+                                    step.getModuleRequestId(),
+                                    getContext().get(TaskListener.class));
+                            getContext().onSuccess(result);
+                        }
                     } catch (MBSException mex) {
                         getContext().onFailure(mex);
                         mex.printStackTrace();

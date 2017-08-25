@@ -1,0 +1,87 @@
+{
+  "component_builds": [
+    1,
+    2
+  ],
+  "id": 1,
+  "koji_tag": "module-testmodule-f26-20170803183327",
+  "modulemd": "data:\n  components:\n    rpms:\n      ed: {cache: 'http://pkgs.fedoraproject.org/repo/pkgs/ed', rationale: A test\n          build., ref: f26, repository: 'git://pkgs.fedoraproject.org/rpms/ed'}\n  dependencies:\n    buildrequires: {bootstrap: f26}\n  description: This module demonstrates how to write simple modulemd files And can\n    be used for testing the build and release pipeline.\n  license:\n    module: [MIT]\n  name: testmodule\n  references: {community: 'https://docs.pagure.org/modularity/', documentation: 'https://fedoraproject.org/wiki/Fedora_Packaging_Guidelines_for_Modules'}\n  stream: f26\n  summary: A test module in all its beautiful beauty\n  version: 20170803183327\n  xmd:\n    mbs:\n      buildrequires:\n        bootstrap: {ref: ae993ba84f4bce554471382ccba917ef16265f11, stream: f26, version: '1'}\n      commit: b8bc29bca1636395d0e97729a4ab9473d1e41ba5\n      rpms:\n        ed: {ref: 294cc9c77141dd8232afc8200a01537284fa939f}\n      scmurl: git://pkgs.fedoraproject.org/modules/testmodule.git?#b8bc29bca1636395d0e97729a4ab9473d1e41ba5\ndocument: modulemd\nversion: 1\n",
+  "name": "testmodule",
+  "owner": "anonymous",
+  "scmurl": "git://pkgs.fedoraproject.org/modules/testmodule.git?#b8bc29bca1636395d0e97729a4ab9473d1e41ba5",
+  "state": 5,
+  "state_name": "ready",
+  "state_reason": null,
+  "state_trace": [
+    {
+      "reason": null,
+      "state": 1,
+      "state_name": "wait",
+      "time": "2017-08-25T20:07:38Z"
+    },
+    {
+      "reason": null,
+      "state": 1,
+      "state_name": "wait",
+      "time": "2017-08-25T20:08:01Z"
+    },
+    {
+      "reason": null,
+      "state": 2,
+      "state_name": "build",
+      "time": "2017-08-25T20:08:43Z"
+    },
+    {
+      "reason": null,
+      "state": 2,
+      "state_name": "build",
+      "time": "2017-08-25T20:09:44Z"
+    },
+    {
+      "reason": null,
+      "state": 3,
+      "state_name": "done",
+      "time": "2017-08-25T20:09:46Z"
+    },
+    {
+      "reason": null,
+      "state": 3,
+      "state_name": "done",
+      "time": "2017-08-25T20:09:46Z"
+    },
+    {
+      "reason": null,
+      "state": 5,
+      "state_name": "ready",
+      "time": "2017-08-25T20:09:46Z"
+    },
+    {
+      "reason": null,
+      "state": 5,
+      "state_name": "ready",
+      "time": "2017-08-25T20:09:46Z"
+    }
+  ],
+  "state_url": "/module-build-service/1/module-builds/1",
+  "stream": "f26",
+  "tasks": {
+    "rpms": {
+      "ed": {
+        "nvr": "ed-1.14.1-2.module_32c779cd.src.rpm",
+        "state": 1,
+        "state_reason": "",
+        "task_id": 3
+      },
+      "module-build-macros": {
+        "nvr": "module-build-macros-0.1-1.module_32c779cd.src.rpm",
+        "state": 1,
+        "state_reason": "",
+        "task_id": 2
+      }
+    }
+  },
+  "time_completed": "2017-08-25T20:09:46Z",
+  "time_modified": "2017-08-25T20:09:46Z",
+  "time_submitted": "2017-08-25T20:07:36Z",
+  "version": "20170803183327"
+}

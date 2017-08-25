@@ -10,8 +10,17 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.lang.StringUtils;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.logging.Logger;
 
 /**
@@ -27,7 +36,7 @@ public class MBSUtils {
     public static SubmittedRequest submitModuleRequest(String url, String user, String password,
                                                        String module,
                                                        String rev, String branch, TaskListener listener) throws MBSException {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = getUnsafeOkHttpClient();
         String payload = buildPayload(module, branch, rev);
         try {
             RequestBody body = RequestBody.create(JSON, payload);
@@ -65,8 +74,41 @@ public class MBSUtils {
         return url + "?verbose=true";
     }
 
+    private static OkHttpClient getUnsafeOkHttpClient() {
+        return new OkHttpClient();
+    }
+
+    public static SubmittedRequest queryModule(String baseUrl, String moduleRequestId, TaskListener listener) throws MBSException {
+        String moduleUrl = baseUrl + "/" + moduleRequestId;
+
+        OkHttpClient client = getUnsafeOkHttpClient();
+        try {
+            Request request = new Request.Builder()
+                    .url(augmentUrl(moduleUrl))
+                    .build();
+
+            listener.getLogger().println("");
+            listener.getLogger().println("Querying Module Build Requests at: " + augmentUrl(moduleUrl));
+            listener.getLogger().println("");
+            Response response = client.newCall(request).execute();
+            String json = response.body().string();
+            if (response.isSuccessful()) {
+                SubmittedRequest result = new ObjectMapper().readerFor(SubmittedRequest.class).readValue(json);
+                if (result == null) {
+                    throw new MBSException("Unable to create SubmittedRequest object from: " + json);
+                }
+                listener.getLogger().println("Submitted Request ID: " + result.getId());
+                return result;
+            }
+            throw new MBSException("Call to " + augmentUrl(moduleUrl) + " returned " + response.code() + " Response was: " + json);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new MBSException(e);
+        }
+    }
+
     public static QueryResult query(String url, TaskListener listener) throws MBSException {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = getUnsafeOkHttpClient();
         try {
             Request request = new Request.Builder()
                     .url(augmentUrl(url))

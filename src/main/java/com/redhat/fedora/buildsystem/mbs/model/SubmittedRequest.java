@@ -382,4 +382,9 @@ public class SubmittedRequest implements Serializable {
                 ", version='" + version + '\'' +
                 '}';
     }
+
+    public boolean isModuleReady() {
+        return getState() == 5;
+    }
+
 }
