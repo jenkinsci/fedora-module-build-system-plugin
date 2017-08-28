@@ -20,7 +20,6 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRuleNonLocalhost;
 
 import java.io.File;
@@ -41,8 +40,33 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/*
+ * The MIT License
+ *
+ * Copyright (c) Red Hat, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 public class MBSTest {
     private static final int HTTPOK = 200;
+    private static final int HTTPNOTFOUND = 404;
     private static final int SERVICE_PORT = 32000;
     private static final int HTTPUNAUTHORIZED = 401;
 
@@ -84,6 +108,11 @@ public class MBSTest {
                 .withBody(body);
     }
 
+    private ResponseDefinitionBuilder notfound() {
+        return aResponse()
+                .withStatus(HTTPNOTFOUND);
+    }
+
     private ResponseDefinitionBuilder notauthorized() {
         return aResponse()
                 .withStatus(HTTPUNAUTHORIZED)
@@ -107,6 +136,11 @@ public class MBSTest {
 
     private QueryResult query() {
         return MBSUtils.query("http://localhost:" + SERVICE_PORT + MBSUtils.MBS_URLPREFIX, getTaskListenerMock());
+    }
+
+    private SubmittedRequest queryModule() {
+        return MBSUtils.queryModule("http://localhost:" + SERVICE_PORT + MBSUtils.MBS_URLPREFIX, "999",
+                getTaskListenerMock());
     }
 
     @Test(expected = MBSException.class)
@@ -218,6 +252,21 @@ public class MBSTest {
             System.out.println(s);
         }
         return b;
+    }
+
+    @Test(expected = MBSException.class)
+    public void queryNotFound() throws Exception {
+        stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
+                .willReturn(notfound()));
+        query();
+    }
+
+
+    @Test(expected = MBSException.class)
+    public void queryModuleNotFound() throws Exception {
+        stubFor(get(urlMatching(MBSUtils.MBS_URLPREFIX + ".+"))
+                .willReturn(notfound()));
+        queryModule();
     }
 
     @Test

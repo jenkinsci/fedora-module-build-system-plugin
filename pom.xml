@@ -80,6 +80,7 @@
   <jenkins-scm-api.version>2.2.1</jenkins-scm-api.version>
   <jenkins-script-security.version>1.33</jenkins-script-security.version>
   <jenkins-credentials-binding.version>1.13</jenkins-credentials-binding.version>
+  <jacoco.version>0.7.5.201505241946</jacoco.version>
  </properties>
 
  <dependencyManagement>
@@ -266,6 +267,45 @@
      <excludes>
       <exclude>InjectedTest.java</exclude>
      </excludes>
+    </configuration>
+   </plugin>
+   <plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>${jacoco.version}</version>
+    <executions>
+     <execution>
+      <id>prepare-agent</id>
+      <goals>
+       <goal>prepare-agent</goal>
+      </goals>
+     </execution>
+     <execution>
+      <id>report</id>
+      <phase>prepare-package</phase>
+      <goals>
+       <goal>report</goal>
+      </goals>
+     </execution>
+     <execution>
+      <id>post-unit-test</id>
+      <phase>test</phase>
+      <goals>
+       <goal>report</goal>
+      </goals>
+      <configuration>
+       <!-- Sets the path to the file which contains the execution data. -->
+
+       <dataFile>target/jacoco.exec</dataFile>
+       <!-- Sets the output directory for the code coverage report. -->
+       <outputDirectory>target/jacoco-ut</outputDirectory>
+      </configuration>
+     </execution>
+    </executions>
+    <configuration>
+     <systemPropertyVariables>
+      <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
+     </systemPropertyVariables>
     </configuration>
    </plugin>
   </plugins>
