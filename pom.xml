@@ -79,7 +79,7 @@
   <jenkins-workflow-scm-step.version>2.5</jenkins-workflow-scm-step.version>
   <jenkins-scm-api.version>2.2.1</jenkins-scm-api.version>
   <jenkins-script-security.version>1.33</jenkins-script-security.version>
-  <jenkins-credentials-binding.version>1.13</jenkins-credentials-binding.version>
+  <jenkins-credentials-binding.version>1.23</jenkins-credentials-binding.version>
   <jacoco.version>0.7.5.201505241946</jacoco.version>
  </properties>
 
